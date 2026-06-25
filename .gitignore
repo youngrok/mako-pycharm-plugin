@@ -1,0 +1,21 @@
+# Build output
+build/
+out/
+
+# Gradle
+.gradle/
+!gradle/wrapper/gradle-wrapper.jar
+
+# IntelliJ Platform Gradle Plugin sandbox/caches
+.intellijPlatform/
+
+# Kotlin
+.kotlin/
+
+# IDEs / editors
+.idea/
+.vscode/
+*.iml
+
+# OS
+.DS_Store

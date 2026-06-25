@@ -1,0 +1,123 @@
+<idea-plugin>
+    <id>com.github.youngrok.mako</id>
+    <name>Mako Template Support</name>
+    <version>0.1.0</version>
+    <vendor url="https://github.com/youngrok/mako-pycharm-plugin">youngrok</vendor>
+
+    <description><![CDATA[
+        <p>Brings back support for <a href="https://www.makotemplates.org/">Mako</a>
+        templates, removed from PyCharm in 2021.3
+        (<a href="https://youtrack.jetbrains.com/issue/PY-51736">PY-51736</a>).</p>
+        <ul>
+            <li>Syntax highlighting for <code>${...}</code> expressions,
+                <code>&lt;% ... %&gt;</code> Python blocks, <code>&lt;%! ... %&gt;</code>
+                module blocks, <code>% if/for/...</code> control structures,
+                <code>##</code> and <code>&lt;%doc&gt;</code> comments and Mako tags
+                (<code>&lt;%def&gt;</code>, <code>&lt;%inherit&gt;</code>,
+                <code>&lt;%page&gt;</code>, ...).</li>
+            <li>HTML highlighting, completion and tag-closing between Mako tags.</li>
+            <li>Python language injection into all code regions — completion, type
+                inference, inspections and navigation work inside Mako code.</li>
+            <li>Mako appears in <i>Settings | Languages &amp; Frameworks | Python
+                Template Languages</i> next to Django, Jinja2 and Chameleon
+                (PyCharm Professional).</li>
+            <li>Brace matching, code commenting and a configurable color scheme.</li>
+        </ul>
+    ]]></description>
+
+    <change-notes><![CDATA[
+        <p>0.1.0 — Initial release: highlighting, lexer/parser, Python injection,
+        brace matching, commenter and color settings page.</p>
+    ]]></change-notes>
+
+    <!-- Core platform. -->
+    <depends>com.intellij.modules.platform</depends>
+    <!-- HTML/XML support: data language for the template (highlighting/completion). -->
+    <depends>com.intellij.modules.xml</depends>
+    <!-- Python plugin: required for Python injection (always bundled in PyCharm). -->
+    <depends>com.intellij.modules.python</depends>
+
+    <!-- V2 content-module dependency: provides PythonTemplateLanguage, the base
+         class that makes Mako appear in the Python Template Languages dropdown. -->
+    <dependencies>
+        <module name="intellij.template.lang.core"/>
+    </dependencies>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <fileType
+            name="Mako"
+            implementationClass="com.github.youngrok.mako.filetype.MakoFileType"
+            fieldName="INSTANCE"
+            language="Mako"
+            extensions="mako;mak"/>
+
+        <lang.parserDefinition
+            language="Mako"
+            implementationClass="com.github.youngrok.mako.parser.MakoParserDefinition"/>
+
+        <!-- Splits each Mako file into a Mako tree + an HTML (data) tree. -->
+        <lang.fileViewProviderFactory
+            language="Mako"
+            implementationClass="com.github.youngrok.mako.lang.MakoFileViewProviderFactory"/>
+
+        <!-- Force .html/.xhtml/.xml under a Mako template root to parse as Mako,
+             winning the precedence race against the web-framework substitutor
+             (order=first) which otherwise keeps the file as plain HTML. -->
+        <!-- `before web-framework-html` pins us ahead of Vue/web substitutor
+             regardless of plugin load order (both would otherwise be order=first). -->
+        <lang.substitutor
+            language="HTML"
+            order="first, before web-framework-html"
+            implementationClass="com.github.youngrok.mako.lang.MakoLanguageSubstitutor"/>
+        <lang.substitutor
+            language="XHTML"
+            order="first"
+            implementationClass="com.github.youngrok.mako.lang.MakoLanguageSubstitutor"/>
+        <lang.substitutor
+            language="XML"
+            order="first"
+            implementationClass="com.github.youngrok.mako.lang.MakoLanguageSubstitutor"/>
+
+        <lang.syntaxHighlighterFactory
+            language="Mako"
+            implementationClass="com.github.youngrok.mako.highlight.MakoSyntaxHighlighterFactory"/>
+
+        <!-- Layers the data-language (HTML/JS/CSS) highlighting onto OUTER regions. -->
+        <editorHighlighterProvider
+            filetype="Mako"
+            implementationClass="com.github.youngrok.mako.highlight.MakoEditorHighlighterProvider"/>
+
+        <colorSettingsPage
+            implementation="com.github.youngrok.mako.highlight.MakoColorSettingsPage"/>
+
+        <lang.commenter
+            language="Mako"
+            implementationClass="com.github.youngrok.mako.lang.MakoCommenter"/>
+
+        <lang.braceMatcher
+            language="Mako"
+            implementationClass="com.github.youngrok.mako.lang.MakoBraceMatcher"/>
+
+        <multiHostInjector
+            implementation="com.github.youngrok.mako.inject.MakoPythonInjector"/>
+
+        <!-- Reuses PyCharm's render-context engine (Django/Flask
+             TemplateContextProvider) to offer render() context variables as
+             completions inside Mako code regions. -->
+        <completion.contributor
+            language="any"
+            implementationClass="com.github.youngrok.mako.inject.MakoRenderContextCompletion"/>
+
+        <!-- Go-to-Declaration on a render-context variable jumps to the view's
+             definition, bypassing the Python evaluator's faulty extra resolve hop. -->
+        <gotoDeclarationHandler
+            implementation="com.github.youngrok.mako.inject.MakoContextGotoHandler"/>
+    </extensions>
+
+    <!-- Resolve Mako ${} names to render-context variables (reuses the same
+         TemplateContextProvider engine). Registered in the Python plugin's EP. -->
+    <extensions defaultExtensionNs="Pythonid">
+        <pyReferenceResolveProvider
+            implementation="com.github.youngrok.mako.inject.MakoContextResolveProvider"/>
+    </extensions>
+</idea-plugin>
