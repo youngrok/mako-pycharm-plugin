@@ -45,7 +45,11 @@ modern PyCharm, after JetBrains removed the bundled Mako support in 2021.3
 Mako-specific authoring aids are still missing — these are planned:
 
 - **Tag name completion** — completing `<%def`, `<%inherit`, `<%namespace`,
-  `<%block`, `<%call`, … and their attributes (`name`, `file`, `args`).
+  `<%block`, `<%call`, ….
+- **Tag attribute completion** — completing each tag's parameters (e.g. `name`,
+  `file`, `args`, `import`), and completing their *values* — most importantly
+  **file-path completion** for path attributes like `file=` (`<%inherit file="…">`,
+  `<%namespace file="…">`, `<%include file="…">`).
 - **Closing-tag completion / matching** — auto-inserting or completing `</%def>`,
   `</%block>`, … and highlighting the matching open/close pair.
 - **Control terminators** — completing `% endfor` / `% endif` / `% endwhile`
@@ -98,6 +102,17 @@ From a release zip:
 
 Requires JDK 21 (the IntelliJ Platform 2025.1 toolchain).
 
+## Releases
+
+Every push and PR is built and tested on CI. To cut a release, push a tag:
+
+```bash
+git tag v0.1.0 && git push origin v0.1.0
+```
+
+CI then builds the plugin and publishes a GitHub Release with the installable
+`.zip` attached.
+
 ## Architecture
 
 | Concern | Class |
@@ -119,4 +134,4 @@ injected into the code tokens of the Mako tree via a `MultiHostInjector`.
 
 ## License
 
-MIT.
+[MIT](LICENSE).
