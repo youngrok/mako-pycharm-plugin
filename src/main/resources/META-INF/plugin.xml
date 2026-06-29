@@ -1,7 +1,7 @@
 <idea-plugin>
     <id>com.github.youngrok.mako</id>
     <name>Mako Template Support</name>
-    <version>0.1.0</version>
+    <version>0.2.0</version>
     <vendor url="https://github.com/youngrok/mako-pycharm-plugin">youngrok</vendor>
 
     <description><![CDATA[
@@ -16,6 +16,12 @@
                 (<code>&lt;%def&gt;</code>, <code>&lt;%inherit&gt;</code>,
                 <code>&lt;%page&gt;</code>, ...).</li>
             <li>HTML highlighting, completion and tag-closing between Mako tags.</li>
+            <li>Tag-name completion after <code>&lt;%</code>
+                (<code>&lt;%def&gt;</code>, <code>&lt;%include&gt;</code>,
+                <code>&lt;%inherit&gt;</code>, ...).</li>
+            <li>Path completion and navigation for the <code>file="..."</code>
+                attribute of <code>&lt;%include&gt;</code>/<code>&lt;%inherit&gt;</code>,
+                resolved against the configured template root.</li>
             <li>Python language injection into all code regions — completion, type
                 inference, inspections and navigation work inside Mako code.</li>
             <li>Mako appears in <i>Settings | Languages &amp; Frameworks | Python
@@ -26,6 +32,15 @@
     ]]></description>
 
     <change-notes><![CDATA[
+        <p>0.2.0 — Completion improvements:</p>
+        <ul>
+            <li>Tag-name completion after <code>&lt;%</code>
+                (<code>&lt;%def&gt;</code>, <code>&lt;%include&gt;</code>,
+                <code>&lt;%inherit&gt;</code>, ...), with auto-popup as you type.</li>
+            <li>Path completion and navigation for the <code>file="..."</code>
+                attribute of <code>&lt;%include&gt;</code>/<code>&lt;%inherit&gt;</code>,
+                resolved against the configured template root.</li>
+        </ul>
         <p>0.1.0 — Initial release: highlighting, lexer/parser, Python injection,
         brace matching, commenter and color settings page.</p>
     ]]></change-notes>
@@ -107,6 +122,24 @@
         <completion.contributor
             language="any"
             implementationClass="com.github.youngrok.mako.inject.MakoRenderContextCompletion"/>
+
+        <!-- Completes Mako tag names (<%def>, <%include>, ...) after `<%`.
+             Registered for `any` because the completion position lands in the
+             HTML data tree; the contributor inspects the Mako tree itself. -->
+        <completion.contributor
+            language="any"
+            implementationClass="com.github.youngrok.mako.completion.MakoTagCompletionContributor"/>
+
+        <!-- Path completion & navigation for file="..." in <%include>/<%inherit>,
+             resolved against the configured template root folders. -->
+        <psi.referenceContributor
+            language="Mako"
+            implementation="com.github.youngrok.mako.reference.MakoFileReferenceContributor"/>
+
+        <!-- Auto-popup completion as you type (like HTML), so tag names and
+             file paths appear without pressing Ctrl+Space. -->
+        <typedHandler
+            implementation="com.github.youngrok.mako.completion.MakoAutoPopupHandler"/>
 
         <!-- Go-to-Declaration on a render-context variable jumps to the view's
              definition, bypassing the Python evaluator's faulty extra resolve hop. -->

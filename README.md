@@ -30,6 +30,14 @@ modern PyCharm, after JetBrains removed the bundled Mako support in 2021.3
   *Settings | Languages & Frameworks | Python Template Languages* dropdown next to
   Django, Jinja2 and Chameleon — selecting it lets PyCharm treat your template
   folders as Mako, just like the old bundled support did.
+- **Tag-name completion**: typing `<%` offers the Mako tags (`<%def>`,
+  `<%include>`, `<%inherit>`, `<%block>`, `<%namespace>`, `<%call>`, `<%page>`,
+  `<%text>`, `<%doc>`) with an auto-popup as you type, and inserts a ready-to-fill
+  skeleton (closing tag or `/>`, plus the common attribute).
+- **Template-file completion & navigation**: the `file="…"` attribute of
+  `<%include>`/`<%inherit>` completes and resolves against the configured template
+  root (Mako's `TemplateLookup` semantics, including leading-`/` root-relative
+  paths), so Ctrl/Cmd+Click jumps to the referenced template.
 - **Render-context variables**: the variables a view passes to `render(...)` become
   real Python names inside the template — completion, type inference and
   go-to-declaration all work on them. This does **not** reimplement context
@@ -44,12 +52,10 @@ modern PyCharm, after JetBrains removed the bundled Mako support in 2021.3
 
 Mako-specific authoring aids are still missing — these are planned:
 
-- **Tag name completion** — completing `<%def`, `<%inherit`, `<%namespace`,
-  `<%block`, `<%call`, ….
 - **Tag attribute completion** — completing each tag's parameters (e.g. `name`,
-  `file`, `args`, `import`), and completing their *values* — most importantly
-  **file-path completion** for path attributes like `file=` (`<%inherit file="…">`,
-  `<%namespace file="…">`, `<%include file="…">`).
+  `args`, `import`) and their values. (Value completion for the `file=` path
+  attribute of `<%include>`/`<%inherit>` is already supported; other attributes
+  are not yet.)
 - **Closing-tag completion / matching** — auto-inserting or completing `</%def>`,
   `</%block>`, … and highlighting the matching open/close pair.
 - **Control terminators** — completing `% endfor` / `% endif` / `% endwhile`

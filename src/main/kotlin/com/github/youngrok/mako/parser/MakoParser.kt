@@ -80,8 +80,24 @@ class MakoParser : PsiParser {
             ) {
                 break
             }
-            builder.advanceLexer()
+            if (t == MakoTypes.ATTR_NAME) {
+                parseAttribute(builder)
+            } else {
+                builder.advanceLexer()
+            }
         }
         m.done(MakoTypes.TAG)
+    }
+
+    /** Groups `name = "value"` into an [MakoTypes.ATTRIBUTE], so the attribute
+     *  value can host file references (see MakoFileReferenceContributor). */
+    private fun parseAttribute(builder: PsiBuilder) {
+        val m = builder.mark()
+        builder.advanceLexer() // ATTR_NAME
+        if (builder.tokenType == MakoTypes.ATTR_EQ) {
+            builder.advanceLexer()
+            if (builder.tokenType == MakoTypes.ATTR_VALUE) builder.advanceLexer()
+        }
+        m.done(MakoTypes.ATTRIBUTE)
     }
 }

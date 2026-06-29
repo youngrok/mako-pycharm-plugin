@@ -1,5 +1,6 @@
 package com.github.youngrok.mako.parser
 
+import com.github.youngrok.mako.psi.MakoAttribute
 import com.github.youngrok.mako.psi.MakoFile
 import com.github.youngrok.mako.psi.MakoInjectionHost
 import com.github.youngrok.mako.psi.MakoTypes
@@ -33,6 +34,7 @@ class MakoParserDefinition : ParserDefinition {
         MakoTypes.EXPRESSION,
         MakoTypes.PYTHON_BLOCK,
         MakoTypes.CONTROL_LINE -> MakoInjectionHost(node)
+        MakoTypes.ATTRIBUTE -> MakoAttribute(node)
         else -> ASTWrapperPsiElement(node)
     }
 
