@@ -122,6 +122,70 @@ class MakoHtmlTemplateCompletionTest : BasePlatformTestCase() {
         assertEquals("must resolve against template root", base, ref!!.resolve())
     }
 
+    // -------------------------------------------------------- attribute names
+
+    fun testAttributeCompletionForDef() {
+        setUpMakoTemplateRoot()
+        val file = configureTemplate("templates/page.html", "<%def <caret>>\n</%def>")
+        assertEquals(MakoLanguage, baseLang(file))
+        myFixture.completeBasic()
+        val names = myFixture.lookupElementStrings ?: emptyList()
+        assertTrue("def attributes expected, got $names",
+            names.containsAll(listOf("name", "args", "filter", "cached")))
+        // Attributes of a different tag must not leak in.
+        assertFalse("`file` is not a <%def> attribute, got $names", names.contains("file"))
+    }
+
+    fun testAttributeCompletionForInclude() {
+        setUpMakoTemplateRoot()
+        val file = configureTemplate("templates/page.html", "<%include <caret>/>")
+        assertEquals(MakoLanguage, baseLang(file))
+        myFixture.completeBasic()
+        val names = myFixture.lookupElementStrings ?: emptyList()
+        assertTrue("include attributes expected, got $names",
+            names.containsAll(listOf("file", "import", "args")))
+        assertFalse("`name` is not an <%include> attribute, got $names", names.contains("name"))
+    }
+
+    fun testAttributePrefixFilters() {
+        setUpMakoTemplateRoot()
+        // `ca` should narrow <%def> attributes to the cache_* / cached family.
+        val file = configureTemplate("templates/page.html", "<%def name=\"f\" ca<caret>>\n</%def>")
+        myFixture.completeBasic()
+        val names = myFixture.lookupElementStrings ?: emptyList()
+        assertTrue("cached should match prefix 'ca', got $names", names.contains("cached"))
+        assertFalse("name does not match prefix 'ca', got $names", names.contains("name"))
+    }
+
+    fun testAlreadyUsedAttributeNotSuggested() {
+        setUpMakoTemplateRoot()
+        // `name` is already present → should not be offered again.
+        val file = configureTemplate("templates/page.html", "<%def name=\"foo\" <caret>>\n</%def>")
+        myFixture.completeBasic()
+        val names = myFixture.lookupElementStrings ?: emptyList()
+        assertFalse("already-used `name` must not be re-suggested, got $names", names.contains("name"))
+        assertTrue("other attributes still offered, got $names", names.contains("args"))
+    }
+
+    fun testNoAttributeCompletionInsideValue() {
+        setUpMakoTemplateRoot()
+        // Caret inside the quoted value → attribute-name completion must NOT fire.
+        val file = configureTemplate("templates/page.html", "<%def name=\"<caret>\">\n</%def>")
+        myFixture.completeBasic()
+        val names = myFixture.lookupElementStrings ?: emptyList()
+        assertFalse("attribute names must not appear inside a value, got $names",
+            names.contains("args"))
+    }
+
+    fun testAttributeInsertAddsEqualsQuotes() {
+        setUpMakoTemplateRoot()
+        // `arg` uniquely matches `args` → auto-completes, and the handler appends ="".
+        configureTemplate("templates/page.html", "<%def name=\"f\" arg<caret>>\n</%def>")
+        myFixture.completeBasic()
+        assertTrue("args should be inserted with =\"\", got [${myFixture.file.text}]",
+            myFixture.file.text.contains("args=\"\""))
+    }
+
     // --------------------------------------------------------------- auto-popup
 
     /**

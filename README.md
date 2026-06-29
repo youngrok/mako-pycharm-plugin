@@ -34,6 +34,10 @@ modern PyCharm, after JetBrains removed the bundled Mako support in 2021.3
   `<%include>`, `<%inherit>`, `<%block>`, `<%namespace>`, `<%call>`, `<%page>`,
   `<%text>`, `<%doc>`) with an auto-popup as you type, and inserts a ready-to-fill
   skeleton (closing tag or `/>`, plus the common attribute).
+- **Tag attribute-name completion**: inside an open tag, typing offers that tag's
+  attributes (`<%def name args filter cached …>`, `<%include file import args>`,
+  `<%page args expression_filter …>`, …) with an auto-popup; already-used
+  attributes are dropped and picking one inserts `="…"`.
 - **Template-file completion & navigation**: the `file="…"` attribute of
   `<%include>`/`<%inherit>` completes and resolves against the configured template
   root (Mako's `TemplateLookup` semantics, including leading-`/` root-relative
@@ -52,10 +56,9 @@ modern PyCharm, after JetBrains removed the bundled Mako support in 2021.3
 
 Mako-specific authoring aids are still missing — these are planned:
 
-- **Tag attribute completion** — completing each tag's parameters (e.g. `name`,
-  `args`, `import`) and their values. (Value completion for the `file=` path
-  attribute of `<%include>`/`<%inherit>` is already supported; other attributes
-  are not yet.)
+- **Attribute *value* completion** — for attributes other than `file=` (whose
+  path completion is already supported). Attribute *names* are completed; their
+  values (e.g. `filter=`, `cached=`) are not yet.
 - **Closing-tag completion / matching** — auto-inserting or completing `</%def>`,
   `</%block>`, … and highlighting the matching open/close pair.
 - **Control terminators** — completing `% endfor` / `% endif` / `% endwhile`

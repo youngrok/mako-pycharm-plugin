@@ -55,4 +55,5 @@ class MakoTagAutoPopupTypingTest : BasePlatformTestCase() {
                 strings.contains("div"))
         }
     }
+
 }

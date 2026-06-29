@@ -1,7 +1,7 @@
 <idea-plugin>
     <id>com.github.youngrok.mako</id>
     <name>Mako Template Support</name>
-    <version>0.2.0</version>
+    <version>0.3.0</version>
     <vendor url="https://github.com/youngrok/mako-pycharm-plugin">youngrok</vendor>
 
     <description><![CDATA[
@@ -32,6 +32,10 @@
     ]]></description>
 
     <change-notes><![CDATA[
+        <p>0.3.0 — Tag attribute-name completion inside an open tag
+        (<code>&lt;%def name args …&gt;</code>, <code>&lt;%include file import …&gt;</code>,
+        …), with auto-popup as you type; already-used attributes are filtered out
+        and picking one inserts <code>="…"</code>.</p>
         <p>0.2.0 — Completion improvements:</p>
         <ul>
             <li>Tag-name completion after <code>&lt;%</code>
@@ -129,6 +133,12 @@
         <completion.contributor
             language="any"
             implementationClass="com.github.youngrok.mako.completion.MakoTagCompletionContributor"/>
+
+        <!-- Completes Mako tag attribute names inside an open tag
+             (<%def name args ...>, <%include file import ...>, ...). -->
+        <completion.contributor
+            language="any"
+            implementationClass="com.github.youngrok.mako.completion.MakoAttributeCompletionContributor"/>
 
         <!-- Path completion & navigation for file="..." in <%include>/<%inherit>,
              resolved against the configured template root folders. -->
